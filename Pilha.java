@@ -1,4 +1,4 @@
-public class Pilha<X> implements Cloneble
+public class Pilha<X> implements Cloneable
 {
     private int ultimo = -1;
     private int tamanho;
@@ -153,7 +153,7 @@ public class Pilha<X> implements Cloneble
 
         for(int i = 0; i <= modelo.ultimo; i++)
         {
-            this.elemento[i] = modelo.elemento[i];
+            this.elementos[i] = modelo.elementos[i];
             /*if(modelo.elementos[i] instanceof Cloneable)
                 this.elementos[i] = new Clonador<X>().clone(modelo.elementos[i]);
             else
