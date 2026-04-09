@@ -16,7 +16,7 @@ public class Coordenada
         this.lin = lin;
     }
 
-    public int getCol() {
+    public int getCol() { 
         return col;
     }
 
