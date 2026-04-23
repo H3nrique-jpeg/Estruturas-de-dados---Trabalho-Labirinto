@@ -1,10 +1,7 @@
-import java.util.Scanner;
-import java.io.File;
-
-    private int[] leitorLab()
-    {    
-        Scanner scan = new Scanner(System.in);
-        Stystem.out.print("Digite o arquivo de 'labirinto' : ");
-        
-        
-    }
+8
+5
+########
+E      #
+### ####
+########
+########

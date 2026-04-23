@@ -9,15 +9,9 @@ public class Labirinto {
     private Pilha<Coordenada> caminho;
     private Pilha<FilaParada<Coordenada>> possibilidades;
     public Labirinto() {
-        try{
-            this.caminho = new Pilha<Coordenada>(lin*col);
-            this.possibilidades = new Pilha<FilaParada<Coordenada>>(lin*col); 
-        }catch(Exception e){
-            System.out.print("Erro ao criar a fila de possibilidades");
-        }
         
         Scanner scanInput = new Scanner(System.in);
-    
+        
         String fileName = scanInput.nextLine();
         File rawfile = new File(fileName);
         try{
@@ -30,7 +24,7 @@ public class Labirinto {
                 lab = new char[lin][col];
                 for(int i = 0; i<lin;i++){
                     String linha = scan.nextLine();
-                    for(int j = 0; j<col;j++){
+                    for(int j = 0; j<col; j++){
                         lab[i][j] = linha.charAt(j);
                         System.out.print(lab[i][j]);
                         if(j==col-1) System.out.println();
@@ -40,12 +34,22 @@ public class Labirinto {
             }catch(Exception e){
                 System.out.print("Erro ao ler o labirinto, verifique se o formato do arquivo esta correto");
             }
-                
+            
             //scan.close();
         }catch (FileNotFoundException e){
-                System.out.print("Arquivo nao encontrado");
+            System.out.print("Arquivo nao encontrado");
         }
         scanInput.close();
+        
+        try{
+            this.caminho = new Pilha<Coordenada>(lin*col);
+            this.possibilidades = new Pilha<FilaParada<Coordenada>>(lin*col); 
+        }catch(Exception e){
+            System.out.print("Erro ao criar a fila de possibilidades");
+        }
+
+
+
         
     }
     public void resolverLab()
@@ -69,26 +73,54 @@ public class Labirinto {
 
         //RESOLVENDO O LABIRINTO
         
-            while (lab[atual.getCol()][atual.getLin()] != 'S')
+            while (true)
             {
                 try{
+                    System.out.println("=====================================");
+                    
+
                     FilaParada<Coordenada> fila = new FilaParada<Coordenada>(3);
 
                     this.verificarPossibilidades(atual, fila);
                     
-                    atual = fila.isVasia()?modoRegressivo(atual):fila.getUmItem();
+                    Coordenada prox;
 
-                    fila.removaUmItem();
+                    if (fila.isVasia()) {
+                        prox = modoRegressivo(atual);
+                    } else {
+                        prox = fila.getUmItem();
+                        fila.removaUmItem();          
+                        possibilidades.guardeUmItem(fila);
+                    }
 
-                    lab[atual.getCol()][atual.getLin()] = '*';
+                    if (prox == null)
+                        throw new RuntimeException("Labirinto sem solução");
 
+                    atual = prox;
+
+                    if (lab[atual.getLin()][atual.getCol()] == 'S') {
+                        break;
+                    }
+
+                    if (lab[atual.getLin()][atual.getCol()] == ' ')
+                        lab[atual.getLin()][atual.getCol()] = '*';
                     caminho.guardeUmItem(atual);
 
-                    possibilidades.guardeUmItem(fila);
+                    if (!fila.isVasia()) {
+                        possibilidades.guardeUmItem(fila);
+                    }
 
-                    System.out.println("=====================================");
-                    System.out.println(lab);
-                }catch(Exception e){System.out.print(e);}
+                    
+                    for(int i = 0; i < lin; i++){
+                        for(int j = 0; j < col; j++){
+                            System.out.print(lab[i][j]);
+                        }
+                        System.out.println();
+                    }
+                }catch(Exception e){
+                    System.out.print(e);
+                    break;
+                }
             } 
             try{
                 Pilha<Coordenada> inverso = new Pilha<Coordenada>(this.lin*this.col);
@@ -96,12 +128,15 @@ public class Labirinto {
                     inverso.guardeUmItem(caminho.getUmItem());
                     caminho.removaUmItem();
                 }
+                System.out.println("Caminho:");
                 while (!inverso.isVasia()) {
-                    System.out.print(inverso);
-                    System.out.print("  ->  ");
+                    System.out.println(inverso.getUmItem());
                     inverso.removaUmItem();
+                    
                 }
+                System.out.println();
             }catch(Exception e){}
+
                 
      
 
@@ -109,17 +144,24 @@ public class Labirinto {
 
     private void verificarPossibilidades(Coordenada atual, FilaParada<Coordenada> fila){
         try{
-            if (this.lab[atual.getCol()+1][atual.getLin()] == ' ' && atual.getCol() != this.col - 1 || this.lab[atual.getCol()+1][atual.getLin()] == 'S'){
-                fila.guardeUmItem(new Coordenada(atual.getCol()+1, atual.getLin()));
+            //Sul
+            if (atual.getLin() != this.lin - 1 && (this.lab[atual.getLin()+1][atual.getCol()] == ' '  || this.lab[atual.getLin()+1][atual.getCol()] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin()+1, atual.getCol()));
             }
-            if (this.lab[atual.getCol()][atual.getLin()+1] == ' ' && atual.getLin() != this.lin - 1 || this.lab[atual.getCol()+1][atual.getLin()] == 'S'){
-                fila.guardeUmItem(new Coordenada(atual.getCol()+1, atual.getLin()));
+
+            //Leste
+            if (atual.getCol() != this.col - 1 && (this.lab[atual.getLin()][atual.getCol()+1] == ' '  || this.lab[atual.getLin()][atual.getCol()+1] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin(), atual.getCol()+1));
             }
-            if (this.lab[atual.getCol()-1][atual.getLin()] == ' ' && atual.getCol() != 0 || this.lab[atual.getCol()+1][atual.getLin()] == 'S'){
-                fila.guardeUmItem(new Coordenada(atual.getCol()+1, atual.getLin()));
+
+            //Norte
+            if (atual.getLin() != 0 && (this.lab[atual.getLin()-1][atual.getCol()] == ' '  || this.lab[atual.getLin()-1][atual.getCol()] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin()-1, atual.getCol()));
             }
-            if (this.lab[atual.getCol()][atual.getLin()-1] == ' ' && atual.getLin() != 0 || this.lab[atual.getCol()+1][atual.getLin()] == 'S'){
-                fila.guardeUmItem(new Coordenada(atual.getCol()+1, atual.getLin()));
+
+            //Oeste
+            if (atual.getCol() != 0 && (this.lab[atual.getLin()][atual.getCol()-1] == ' '  || this.lab[atual.getLin()][atual.getCol()-1] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin(), atual.getCol()-1));
             }
             
         }catch(Exception e){}
@@ -128,17 +170,21 @@ public class Labirinto {
     private Coordenada modoRegressivo(Coordenada atual)
     {
         try{
-            while (possibilidades.getUmItem().isVasia())
+            while (!possibilidades.isVasia())
             {
+                FilaParada<Coordenada> fila = possibilidades.getUmItem();
+                if(!fila.isVasia()) {
+                    Coordenada resp = fila.getUmItem();
+                    fila.removaUmItem();
+                    return resp;
+                }
+                possibilidades.removaUmItem();
                 atual = caminho.getUmItem();
                 caminho.removaUmItem();
-                lab[atual.getCol()][atual.getLin()] = ' ';
-                possibilidades.removaUmItem();
+                lab[atual.getLin()][atual.getCol()] = ' ';
+                
             }
-            Coordenada resp = possibilidades.getUmItem().getUmItem();
-            possibilidades.getUmItem().removaUmItem();
-            return resp;
-
+            
         }catch(Exception e){}
         return null;
     }
