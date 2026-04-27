@@ -8,7 +8,9 @@ public class Labirinto {
     private char[][] lab;
     private Pilha<Coordenada> caminho;
     private Pilha<FilaParada<Coordenada>> possibilidades;
-    public Labirinto() {
+
+
+    public Labirinto() throws Exception{
         
         Scanner scanInput = new Scanner(System.in);
         
@@ -26,33 +28,32 @@ public class Labirinto {
                     String linha = scan.nextLine();
                     for(int j = 0; j<col; j++){
                         lab[i][j] = linha.charAt(j);
-                        System.out.print(lab[i][j]);
-                        if(j==col-1) System.out.println();
+                        //System.out.print(lab[i][j]);
+                        //if(j==col-1) System.out.println();
                     }
                 }  
                 scan.close();
             }catch(Exception e){
-                System.out.print("Erro ao ler o labirinto, verifique se o formato do arquivo esta correto");
+                throw new Exception("incoerencia ao ler o labirinto, verifique se o formato do arquivo esta correto");
             }
             
-            //scan.close();
+            scanInput.close();
         }catch (FileNotFoundException e){
-            System.out.print("Arquivo nao encontrado");
+            scanInput.close();
+            throw new Exception("Arquivo nao encontrado");  
         }
-        scanInput.close();
+        
         
         try{
             this.caminho = new Pilha<Coordenada>(lin*col);
             this.possibilidades = new Pilha<FilaParada<Coordenada>>(lin*col); 
         }catch(Exception e){
-            System.out.print("Erro ao criar a fila de possibilidades");
-        }
-
-
-
-        
+            throw new Exception("impossivel criar a fila de possibilidades");
+        } 
     }
-    public void resolverLab()
+
+
+    public void resolverLab() throws Exception
     {
         Coordenada atual = new Coordenada(0,0);
         for(int i = 0 ; i<lin;i++){
@@ -68,7 +69,7 @@ public class Labirinto {
         try{
             caminho.guardeUmItem(atual);
         }catch(Exception e){
-            System.out.print("Erro coordenada inicial vasia");
+            throw new Exception("coordenada inicial vazia");
         }
 
         //RESOLVENDO O LABIRINTO
@@ -76,9 +77,6 @@ public class Labirinto {
             while (true)
             {
                 try{
-                    System.out.println("=====================================");
-                    
-
                     FilaParada<Coordenada> fila = new FilaParada<Coordenada>(3);
 
                     this.verificarPossibilidades(atual, fila);
@@ -109,65 +107,37 @@ public class Labirinto {
                     if (!fila.isVasia()) {
                         possibilidades.guardeUmItem(fila);
                     }
-
-                    
-                    for(int i = 0; i < lin; i++){
-                        for(int j = 0; j < col; j++){
-                            System.out.print(lab[i][j]);
-                        }
-                        System.out.println();
-                    }
                 }catch(Exception e){
-                    System.out.print(e);
-                    break;
+                    throw new Exception(e.getMessage());
                 }
             } 
-            try{
-                Pilha<Coordenada> inverso = new Pilha<Coordenada>(this.lin*this.col);
-                while (!caminho.isVasia()) {
-                    inverso.guardeUmItem(caminho.getUmItem());
-                    caminho.removaUmItem();
-                }
-                System.out.println("Caminho:");
-                while (!inverso.isVasia()) {
-                    System.out.println(inverso.getUmItem());
-                    inverso.removaUmItem();
-                    
-                }
-                System.out.println();
-            }catch(Exception e){}
-
-                
-     
-
     }
 
-    private void verificarPossibilidades(Coordenada atual, FilaParada<Coordenada> fila){
-        try{
-            //Sul
-            if (atual.getLin() != this.lin - 1 && (this.lab[atual.getLin()+1][atual.getCol()] == ' '  || this.lab[atual.getLin()+1][atual.getCol()] == 'S')){
-                fila.guardeUmItem(new Coordenada(atual.getLin()+1, atual.getCol()));
-            }
 
+    private void verificarPossibilidades(Coordenada atual, FilaParada<Coordenada> fila) throws Exception{
+        try{
             //Leste
             if (atual.getCol() != this.col - 1 && (this.lab[atual.getLin()][atual.getCol()+1] == ' '  || this.lab[atual.getLin()][atual.getCol()+1] == 'S')){
                 fila.guardeUmItem(new Coordenada(atual.getLin(), atual.getCol()+1));
             }
-
+              //Oeste
+            if (atual.getCol() != 0 && (this.lab[atual.getLin()][atual.getCol()-1] == ' '  || this.lab[atual.getLin()][atual.getCol()-1] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin(), atual.getCol()-1));
+            }
+            //Sul
+            if (atual.getLin() != this.lin - 1 && (this.lab[atual.getLin()+1][atual.getCol()] == ' '  || this.lab[atual.getLin()+1][atual.getCol()] == 'S')){
+                fila.guardeUmItem(new Coordenada(atual.getLin()+1, atual.getCol()));
+            }
             //Norte
             if (atual.getLin() != 0 && (this.lab[atual.getLin()-1][atual.getCol()] == ' '  || this.lab[atual.getLin()-1][atual.getCol()] == 'S')){
                 fila.guardeUmItem(new Coordenada(atual.getLin()-1, atual.getCol()));
             }
-
-            //Oeste
-            if (atual.getCol() != 0 && (this.lab[atual.getLin()][atual.getCol()-1] == ' '  || this.lab[atual.getLin()][atual.getCol()-1] == 'S')){
-                fila.guardeUmItem(new Coordenada(atual.getLin(), atual.getCol()-1));
-            }
-            
-        }catch(Exception e){}
+        }catch(Exception e){throw new Exception(e.getMessage());}
     }
 
-    private Coordenada modoRegressivo(Coordenada atual)
+
+
+    private Coordenada modoRegressivo(Coordenada atual) throws Exception
     {
         try{
             while (!possibilidades.isVasia())
@@ -185,12 +155,75 @@ public class Labirinto {
                 
             }
             
-        }catch(Exception e){}
+        }catch(Exception e){throw new Exception(e.getMessage());}
         return null;
     }
+
+
+    
+    public String getCaminho()throws Exception{
+        String res = "";
+                try{
+                Pilha<Coordenada> inverso = new Pilha<Coordenada>(this.lin*this.col);
+                while (!caminho.isVasia()) {
+                    inverso.guardeUmItem(caminho.getUmItem());
+                    caminho.removaUmItem();
+                }
+                while (!inverso.isVasia()) {
+                    res += inverso.getUmItem() + "\n";
+                    inverso.removaUmItem();
+                    
+                }
+                
+            }catch(Exception e){throw new Exception(e.getMessage());}
+            return res;
+    }
+
+
   
+    @Override
+    public int hashCode(){
+        int res = 1;
+        res = res*2+ ((Integer)this.lin).hashCode();
+        res = res*2+ ((Integer)this.col).hashCode();
+        for(int i = 0; i<lin;i++){
+            for(int j = 0; j<col; j++){
+                res = res*2+ ((Character)this.lab[i][j]).hashCode();
+            }
+        }
+        if (res < 0) res = -res;
+        return res;
+    }
 
+
+
+    @Override
+    public String toString(){
+        String res = "";
+        for(int i = 0; i < lin; i++){
+                for(int j = 0; j < col; j++){
+                    res = res + this.lab[i][j];
+                }
+                res = res + "\n";
+            }
+        return res;
+    }
+
+    
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null)return false;
+        if(obj == this)return true;
+        if(obj.getClass() != this.getClass())return false;
+        Labirinto m = (Labirinto)obj;
+        if(m.lin != this.lin)return false;
+        if(m.col != this.col)return false;
+        for(int i = 0; i<lin;i++){
+            for(int j = 0; j<col; j++){
+                if(this.lab[i][j] != m.lab[i][j])return false;
+            }
+        }
+        return true;
+    }
 }
-
-
-

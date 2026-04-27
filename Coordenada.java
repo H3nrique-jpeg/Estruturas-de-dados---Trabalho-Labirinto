@@ -26,7 +26,7 @@ public class Coordenada
     
     @Override
     public String toString() {
-        return "Coordenada [Linha=" + lin + ", Coluna=" + col + "]";
+        return "Coordenada [Linha=" + lin + ", Coluna=" + col + "] ----> (" + lin + "," + col + ")";
     }
 
     @Override
