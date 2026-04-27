@@ -1,6 +1,3 @@
-
-import java.util.Objects;
-
 public class FilaParada<X>
 {
     private int qtd = 0;
