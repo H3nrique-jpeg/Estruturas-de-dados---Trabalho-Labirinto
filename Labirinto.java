@@ -56,20 +56,25 @@ public class Labirinto {
     public void resolverLab() throws Exception
     {
         Coordenada atual = new Coordenada(0,0);
-        for(int i = 0 ; i<lin;i++){
-            if(i==0 || i == lin-1){
-                for(int j = 0; j<col;j++){
-                    if(lab[i][j] == 'E') atual = new Coordenada(i,j);
+        
+            
+            for(int i = 0 ; i<lin;i++){
+                if(i==0 || i == lin-1){
+                    for(int j = 0; j<col;j++){
+                        if(lab[i][j] == 'E') atual = new Coordenada(i,j);
+                    }
+                }else{
+                    if(lab[i][0] == 'E') atual = new Coordenada(i,0);
+                    else if(lab[i][col-1] == 'E') atual = new Coordenada(i,col-1);
                 }
-            }else{
-                if(lab[i][0] == 'E') atual = new Coordenada(i,0);
-                else if(lab[i][col-1] == 'E') atual = new Coordenada(i,col-1);
             }
-        }
-        try{
-            caminho.guardeUmItem(atual);
+            if(lab[atual.getLin()][atual.getCol()] != 'E')
+                throw new Exception("Entrada do labirinto nao encontrada, verifique se o formato do arquivo esta correto");
+            
+        try{    
+                caminho.guardeUmItem(atual);
         }catch(Exception e){
-            throw new Exception("coordenada inicial vazia");
+            throw new Exception("Nao foi possivel encontrar a entrada do labirinto, verifique se o formato do arquivo esta correto");
         }
 
         //RESOLVENDO O LABIRINTO
@@ -96,17 +101,18 @@ public class Labirinto {
 
                     atual = prox;
 
+                    caminho.guardeUmItem(atual);
+
                     if (lab[atual.getLin()][atual.getCol()] == 'S') {
                         break;
                     }
 
                     if (lab[atual.getLin()][atual.getCol()] == ' ')
                         lab[atual.getLin()][atual.getCol()] = '*';
-                    caminho.guardeUmItem(atual);
 
-                    if (!fila.isVasia()) {
-                        possibilidades.guardeUmItem(fila);
-                    }
+                    
+
+                    
                 }catch(Exception e){
                     throw new Exception(e.getMessage());
                 }
@@ -143,15 +149,21 @@ public class Labirinto {
             while (!possibilidades.isVasia())
             {
                 FilaParada<Coordenada> fila = possibilidades.getUmItem();
+                Coordenada removido = caminho.getUmItem();
+                caminho.removaUmItem();
+
+                if (lab[removido.getLin()][removido.getCol()] == '*') {
+                    lab[removido.getLin()][removido.getCol()] = ' ';
+                }
+
                 if(!fila.isVasia()) {
                     Coordenada resp = fila.getUmItem();
                     fila.removaUmItem();
                     return resp;
                 }
+                
                 possibilidades.removaUmItem();
-                atual = caminho.getUmItem();
-                caminho.removaUmItem();
-                lab[atual.getLin()][atual.getCol()] = ' ';
+                
                 
             }
             
